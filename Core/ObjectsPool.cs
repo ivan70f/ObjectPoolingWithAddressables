@@ -13,7 +13,7 @@ namespace ObjectPool.Core
 
         private PoolObjectsDestroyer destroyer;
 
-        private delegate void ObjectInstatniationCallback(PoolObject _poolObject, int _poolIndex, Action<PoolObject> _poolCallback);
+        private delegate void ObjectInstatniationCallback(InvokeData _invokeData);
 
         private void Awake()
         {
@@ -105,7 +105,10 @@ namespace ObjectPool.Core
             }
 
             ObjectInstatniationCallback _instatniationCallback = InitializeNewPoolObject;
-            StartCoroutine(InstantiateObject(_prefab, _poolIndex, _instatniationCallback,_callBack));
+            
+            InvokeData _invokeData = new InvokeData(_poolObject, _poolIndex, _callBack);
+
+            StartCoroutine(InstantiateObject(_prefab, _instatniationCallback, _invokeData));
 
             return true;
         }
@@ -123,7 +126,10 @@ namespace ObjectPool.Core
                 for (int j = 0; j < objectPools[j].MaxInstancesAmount; j++)
                 {
                     ObjectInstatniationCallback _callback = InitializeNewPoolObject;
-                    StartCoroutine(InstantiateObject(objectPools[j].Prefab, i, _callback, null));
+                    
+                    InvokeData _invokeData = new InvokeData(null, i, null);
+                    
+                    StartCoroutine(InstantiateObject(objectPools[j].Prefab, _callback, _invokeData));
                 }
             }
         }
@@ -154,29 +160,24 @@ namespace ObjectPool.Core
         /// <summary>
         /// Initialize new instantiated pool object.
         /// </summary>
-        /// <param name="_poolObject"> Instantiated pool object. </param>
-        /// <param name="_poolIndex"> Pool index. </param>
-        /// <param name="_poolCallback"> Callback. </param>
-        private void InitializeNewPoolObject(PoolObject _poolObject, int _poolIndex, Action<PoolObject> _poolCallback)
+        private void InitializeNewPoolObject(InvokeData _invokeData)
         {
-            objectPools[_poolIndex].RegisterObject(_poolObject);
-            _poolObject.GetFromPool(_poolIndex);
-            _poolObject.OnHandlerReturnInvoke += ReturnToPool;
-            _poolCallback?.Invoke(_poolObject);
+            objectPools[_invokeData.PoolIndex].RegisterObject(_invokeData.PoolObject);
+            _invokeData.PoolObject.GetFromPool(_invokeData.PoolIndex);
+            _invokeData.PoolObject.OnHandlerReturnInvoke += ReturnToPool;
+            _invokeData.Callback?.Invoke(_invokeData.PoolObject);
         }
 
         /// <summary>
         /// Instantiate prefab and make it as a child.
         /// </summary>
         /// <param name="_prefab"> Prefab to instantiate. </param>
-        /// <param name="_poolIndex"></param>
-        /// <param name="_callback"></param>
-        /// <param name="_poolCallback"></param>
+        /// <param name="_callback"> Instantiation callback. </param>
+        /// <param name="_invokeData"> Invoke callback. </param>
         private IEnumerator InstantiateObject(
-            AssetReference _prefab, 
-            int _poolIndex,
+            AssetReference _prefab,
             ObjectInstatniationCallback _callback,
-            Action<PoolObject> _poolCallback)
+            InvokeData _invokeData)
         {
             AsyncOperationHandle<GameObject> _handle = _prefab.InstantiateAsync(transform);
 
@@ -186,8 +187,10 @@ namespace ObjectPool.Core
             GameObject _object = _handle.Result;
 
             PoolObject _poolObject = _object.GetComponent<PoolObject>();
+
+            _invokeData.PoolObject = _poolObject;
             
-            _callback?.Invoke(_poolObject, _poolIndex, _poolCallback);
+            _callback?.Invoke(_invokeData);
         }
         
 
@@ -198,6 +201,20 @@ namespace ObjectPool.Core
         private void MovePoolObjectToHandler(PoolObject _poolObject)
         {
             _poolObject.transform.parent = transform;
+        }
+        
+        private struct InvokeData
+        {
+            public PoolObject PoolObject;
+            public readonly int PoolIndex;
+            public readonly Action<PoolObject> Callback;
+
+            public InvokeData(PoolObject _poolObject, int _poolIndex, Action<PoolObject> _poolCallback)
+            {
+                PoolObject = _poolObject;
+                PoolIndex = _poolIndex;
+                Callback = _poolCallback;
+            }
         }
     }
 }

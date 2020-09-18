@@ -34,7 +34,7 @@ namespace ObjectPool.Example
 
         private IEnumerator DestroyObjects()
         {
-            yield return new WaitForSeconds(20);
+            yield return new WaitForSeconds(3);
             
             for (int i = 0; i < objects.Count; i++)
                 objects[i].ReturnToPool();
@@ -52,6 +52,44 @@ namespace ObjectPool.Example
         private void HandlePoolCallback(PoolObject _poolObject)
         {
             objects.Add(_poolObject);
+        }
+        private void SpawnObject()
+        {
+            // Spawn object without any callback.
+            // You can get an error if you forgot to add this prefab to ObjectPool component. 
+            // In this way you cant catch and process this error.
+    
+            pool.GetObject(prefab);
+    
+            // Spawn object and check if it was spawned. 
+            // Returns true if object was spawned.
+    
+            if (pool.TryGetObject(prefab) == true)
+                Debug.Log("Prefab spawned");
+            else
+                Debug.Log("Prefab wasn't spawned");
+        
+            // Spawn object and get a callback with this object.
+            // Due to adressables asynchronous loading you can't get object in moment you get it from pool,
+            // because unity need a bit of time to load it.
+    
+            if (pool.TryGetObject(prefab, PoolCallback) == true)
+                Debug.Log("Prefab spawned");
+            else
+                Debug.Log("Prefab wasn't spawned");
+    
+        }
+        
+        private GameObject spawnedObject;
+
+        private void PoolCallback(PoolObject _poolObject)
+        {
+            spawnedObject = _poolObject.gameObject;
+            
+            
+            _poolObject.ReturnToPool();
+            
+            
         }
     }
 }
