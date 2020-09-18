@@ -2,15 +2,14 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.Assertions;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-namespace ObjectPool
+namespace ObjectPool.Core
 {
     [RequireComponent(typeof(PoolObjectsDestroyer))]
     public class ObjectsPool : MonoBehaviour
     {
-        [SerializeField] private PoolObjectData[] objectPools = new PoolObjectData[0];
+        [SerializeField] private PoolObjectData[] objectPools;
 
         private PoolObjectsDestroyer destroyer;
 
@@ -19,8 +18,6 @@ namespace ObjectPool
         private void Awake()
         {
             destroyer = GetComponent<PoolObjectsDestroyer>();
-            
-            Assert.IsNull(destroyer);
         }
 
         /// <summary>
@@ -28,11 +25,6 @@ namespace ObjectPool
         /// </summary>
         private void Start()
         {
-            for (int i = 0; i < objectPools.Length; i++)
-            {
-                AsyncOperationHandle _handle = objectPools[0].Prefab.LoadAssetAsync<GameObject>();
-            }
- 
             InitializePools();
         }
 
@@ -68,8 +60,6 @@ namespace ObjectPool
             MovePoolObjectToHandler(_poolObject);
             _poolObject.OnHandlerReturnInvoke -= ReturnToPool;
 
-            Debug.Log(objectPools[_poolObject.PoolIndex].CheckSpace());
-
             if (objectPools[_poolObject.PoolIndex].CheckSpace() == false && 
                 objectPools[_poolObject.PoolIndex].DestroyOverflowInstances == true)
             {
@@ -89,20 +79,26 @@ namespace ObjectPool
         /// True if you setted this type up. </returns>
         private bool InitializeObject(AssetReference _prefab, Action<bool, PoolObject> _callBack)
         {
-            PoolObjectData _poolObjectData = new PoolObjectData();
-
             PoolObject _poolObject = null;
             int _poolIndex = -1;
 
-            if (TryFindPoolObjectDataByAssetReference(_prefab, ref _poolObjectData, ref _poolIndex) == false)
+            if (TryFindPoolObjectDataByAssetReference(_prefab, ref _poolIndex) == false)
             {
                 Debug.LogWarning("There is no this prefab type in setup");
                 return false;
             }
 
-            if (_poolObjectData.Register.TryGetAvailableObject(ref _poolObject) == true)
+            ObjectsRegister _register = objectPools[_poolIndex].Register;
+
+            if (_register.TryGetAvailableObject(ref _poolObject) == true)
+            {
+                objectPools[_poolIndex].UpdateRegister(_register);
+                _poolObject.GetFromPool(_poolIndex);
+                _poolObject.OnHandlerReturnInvoke += ReturnToPool;
+                _callBack?.Invoke(true, _poolObject);
                 return true;
-            Debug.Log(_poolObjectData.MaxInstancesAmount);
+            }
+
             ObjectInstatniationCallback _instatniationCallback = InitializeNewPoolObject;
             StartCoroutine(InstantiateObject(_prefab, _poolIndex, _instatniationCallback,_callBack));
 
@@ -131,18 +127,15 @@ namespace ObjectPool
         /// Find pool object data in array by asset reference assigned in PoolObjectData struct.
         /// </summary>
         /// <param name="_prefab"> Prefab asset reference. </param>
-        /// <param name="poolObjectData"> Return pool object data. </param>
         /// <param name="poolIndex"> Index of used pool</param>
         /// <returns> False if there is no this prefab type in PoolHandler setup.
         /// True if you setted this type up.</returns>
-        private bool TryFindPoolObjectDataByAssetReference(AssetReference _prefab, ref PoolObjectData poolObjectData,
-            ref int poolIndex)
+        private bool TryFindPoolObjectDataByAssetReference(AssetReference _prefab, ref int poolIndex)
         {
             for (int i = 0; i < objectPools.Length; i++)
             {
                 if (objectPools[i].Prefab.AssetGUID.Equals(_prefab.AssetGUID))
                 {
-                    poolObjectData = objectPools[i];
                     poolIndex = i;
                     return true;
                 }
@@ -153,9 +146,14 @@ namespace ObjectPool
             return false;
         }
 
+        /// <summary>
+        /// Initialize new instantiated pool object.
+        /// </summary>
+        /// <param name="_poolObject"> Instantiated pool object. </param>
+        /// <param name="_poolIndex"> Pool index. </param>
+        /// <param name="_poolCallback"> Callback. </param>
         private void InitializeNewPoolObject(PoolObject _poolObject, int _poolIndex, Action<bool, PoolObject> _poolCallback)
         {
-            Debug.Log(0);
             objectPools[_poolIndex].RegisterObject(_poolObject);
             _poolObject.GetFromPool(_poolIndex);
             _poolObject.OnHandlerReturnInvoke += ReturnToPool;
@@ -188,6 +186,10 @@ namespace ObjectPool
         }
         
 
+        /// <summary>
+        /// Make pool object as a child of this object.
+        /// </summary>
+        /// <param name="_poolObject"> Pool object. </param>
         private void MovePoolObjectToHandler(PoolObject _poolObject)
         {
             _poolObject.transform.parent = transform;

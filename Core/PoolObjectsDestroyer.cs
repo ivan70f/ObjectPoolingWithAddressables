@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-namespace ObjectPool
+namespace ObjectPool.Core
 {
     public class PoolObjectsDestroyer : MonoBehaviour
     {

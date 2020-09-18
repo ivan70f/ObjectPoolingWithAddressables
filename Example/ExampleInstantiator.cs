@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using ObjectPool.Core;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-namespace ObjectPool
+namespace ObjectPool.Example
 {
     public class ExampleInstantiator : MonoBehaviour
     {
@@ -12,8 +13,6 @@ namespace ObjectPool
         private ObjectsPool pool;
 
         [SerializeField] private List<PoolObject> objects;
-
-        private delegate void PoolCallback(bool _instantiated, PoolObject _poolObject);
 
         private void Awake()
         {
@@ -29,6 +28,8 @@ namespace ObjectPool
             }
 
             StartCoroutine(DestroyObjects());
+            StartCoroutine(SpawnMore());
+
         }
 
         private IEnumerator DestroyObjects()
@@ -37,6 +38,15 @@ namespace ObjectPool
             
             for (int i = 0; i < 15; i++)
                 objects[i].ReturnToPool();
+        }
+
+        private IEnumerator SpawnMore()
+        {
+            yield return new WaitForSeconds(10);
+            for (int i = 0; i < 8; i++)
+            {
+                pool.TryGetObject(prefab, HandlePoolCallback);
+            }
         }
 
         private void HandlePoolCallback(bool _instantiated, PoolObject _poolObject)

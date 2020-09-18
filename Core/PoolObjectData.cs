@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
-namespace ObjectPool
+namespace ObjectPool.Core
 {
     /// <summary>
     /// Data for pooled object.
@@ -65,20 +65,43 @@ namespace ObjectPool
             }
         }
 
+        public void UpdateRegister(ObjectsRegister _register)
+        {
+            register = _register;
+        }
+
+        /// <summary>
+        /// Register pool object in register.
+        /// </summary>
         public void RegisterObject(PoolObject _poolObject)
         {
             instancesCount++;
-            Debug.Log(instancesCount);
 
-            register.AddObjectToRegister(_poolObject);
+            ObjectsRegister _register = register;
+            
+            _register.AddObjectToRegister(_poolObject);
+
+            UpdateRegister(_register);
         }
 
+        /// <summary>
+        /// Unregister pool object in register.
+        /// </summary>
         public void UnregisterObject(PoolObject _poolObject)
         {
             instancesCount--;
-            register.RemoveObjectFromRegister(_poolObject);
+            
+            ObjectsRegister _register = register;
+            
+            _register.RemoveObjectFromRegister(_poolObject);
+
+            UpdateRegister(_register);
         }
         
+        /// <summary>
+        /// Check space available.
+        /// </summary>
+        /// <returns> True if there is space available. </returns>
         public bool CheckSpace()
         {
             if (instancesCount >= maxInstancesAmount)

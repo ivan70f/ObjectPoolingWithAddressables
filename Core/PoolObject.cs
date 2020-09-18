@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ObjectPool
+namespace ObjectPool.Core
 {
     public class PoolObject : MonoBehaviour
     {

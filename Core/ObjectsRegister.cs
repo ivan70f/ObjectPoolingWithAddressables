@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ObjectPool
+namespace ObjectPool.Core
 {
     public struct ObjectsRegister
     {
@@ -18,11 +18,13 @@ namespace ObjectPool
             ValidateRegister();
             
             for (int i = 0; i < instantiatedObjects.Count; i++)
+            {
                 if (instantiatedObjects[i].IsActivated == false)
                 {
                     _poolObject = instantiatedObjects[i];
                     return true;
                 }
+            }
 
             return false;
         }
