@@ -12,7 +12,7 @@ namespace ObjectPool.Example
         
         private ObjectsPool pool;
 
-        [SerializeField] private List<PoolObject> objects;
+        private List<PoolObject> objects;
 
         private void Awake()
         {
@@ -34,25 +34,24 @@ namespace ObjectPool.Example
 
         private IEnumerator DestroyObjects()
         {
-            yield return new WaitForSeconds(3);
+            yield return new WaitForSeconds(20);
             
-            for (int i = 0; i < 15; i++)
+            for (int i = 0; i < objects.Count; i++)
                 objects[i].ReturnToPool();
         }
 
         private IEnumerator SpawnMore()
         {
-            yield return new WaitForSeconds(10);
+            yield return new WaitForSeconds(1);
             for (int i = 0; i < 8; i++)
             {
                 pool.TryGetObject(prefab, HandlePoolCallback);
             }
         }
 
-        private void HandlePoolCallback(bool _instantiated, PoolObject _poolObject)
+        private void HandlePoolCallback(PoolObject _poolObject)
         {
-            if (_instantiated == true)
-                objects.Add(_poolObject);
+            objects.Add(_poolObject);
         }
     }
 }

@@ -104,7 +104,7 @@ namespace ObjectPool.Core
         /// <returns> True if there is space available. </returns>
         public bool CheckSpace()
         {
-            if (instancesCount >= maxInstancesAmount)
+            if (instancesCount > maxInstancesAmount)
                 return false;
 
             return true;

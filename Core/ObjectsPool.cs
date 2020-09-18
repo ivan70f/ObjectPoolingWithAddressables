@@ -13,7 +13,7 @@ namespace ObjectPool.Core
 
         private PoolObjectsDestroyer destroyer;
 
-        private delegate void ObjectInstatniationCallback(PoolObject _poolObject, int _poolIndex, Action<bool, PoolObject> _poolCallback);
+        private delegate void ObjectInstatniationCallback(PoolObject _poolObject, int _poolIndex, Action<PoolObject> _poolCallback);
 
         private void Awake()
         {
@@ -35,9 +35,9 @@ namespace ObjectPool.Core
         /// <param name="_callBack"></param>
         /// <returns> False if there is no this prefab type in PoolHandler setup.
         /// True if you setted this type up. </returns>
-        public void  TryGetObject(AssetReference _prefab, Action<bool, PoolObject> _callBack )
+        public bool  TryGetObject(AssetReference _prefab, Action<PoolObject> _callBack )
         {
-            InitializeObject(_prefab,  _callBack);
+            return InitializeObject(_prefab,  _callBack);
         }
         
         /// <summary>
@@ -49,6 +49,11 @@ namespace ObjectPool.Core
         public bool TryGetObject(AssetReference _prefab)
         {
             return InitializeObject(_prefab, null);
+        }
+
+        public void GetObject(AssetReference _prefab)
+        {
+            InitializeObject(_prefab, null);
         }
 
         /// <summary>
@@ -77,7 +82,7 @@ namespace ObjectPool.Core
         /// <param name="_callBack"></param>
         /// <returns> False if there is no this prefab type in PoolHandler setup.
         /// True if you setted this type up. </returns>
-        private bool InitializeObject(AssetReference _prefab, Action<bool, PoolObject> _callBack)
+        private bool InitializeObject(AssetReference _prefab, Action<PoolObject> _callBack)
         {
             PoolObject _poolObject = null;
             int _poolIndex = -1;
@@ -95,7 +100,7 @@ namespace ObjectPool.Core
                 objectPools[_poolIndex].UpdateRegister(_register);
                 _poolObject.GetFromPool(_poolIndex);
                 _poolObject.OnHandlerReturnInvoke += ReturnToPool;
-                _callBack?.Invoke(true, _poolObject);
+                _callBack?.Invoke(_poolObject);
                 return true;
             }
 
@@ -152,12 +157,12 @@ namespace ObjectPool.Core
         /// <param name="_poolObject"> Instantiated pool object. </param>
         /// <param name="_poolIndex"> Pool index. </param>
         /// <param name="_poolCallback"> Callback. </param>
-        private void InitializeNewPoolObject(PoolObject _poolObject, int _poolIndex, Action<bool, PoolObject> _poolCallback)
+        private void InitializeNewPoolObject(PoolObject _poolObject, int _poolIndex, Action<PoolObject> _poolCallback)
         {
             objectPools[_poolIndex].RegisterObject(_poolObject);
             _poolObject.GetFromPool(_poolIndex);
             _poolObject.OnHandlerReturnInvoke += ReturnToPool;
-            _poolCallback?.Invoke(true, _poolObject);
+            _poolCallback?.Invoke(_poolObject);
         }
 
         /// <summary>
@@ -171,7 +176,7 @@ namespace ObjectPool.Core
             AssetReference _prefab, 
             int _poolIndex,
             ObjectInstatniationCallback _callback,
-            Action<bool, PoolObject> _poolCallback)
+            Action<PoolObject> _poolCallback)
         {
             AsyncOperationHandle<GameObject> _handle = _prefab.InstantiateAsync(transform);
 
@@ -182,7 +187,7 @@ namespace ObjectPool.Core
 
             PoolObject _poolObject = _object.GetComponent<PoolObject>();
             
-            _callback?.Invoke(_poolObject, _poolIndex,_poolCallback);
+            _callback?.Invoke(_poolObject, _poolIndex, _poolCallback);
         }
         
 
