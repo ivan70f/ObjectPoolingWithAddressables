@@ -19,8 +19,9 @@ namespace ObjectPool.Core
         private IEnumerator DestroyObjectOnDelay(PoolObject _poolObject, float _delay)
         {
             yield return new WaitForSeconds(_delay);
-
-            Addressables.ReleaseInstance(_poolObject.gameObject);
+            
+            if (_poolObject.IsActivated == false)
+                Addressables.ReleaseInstance(_poolObject.gameObject);
         }
     }
 }
