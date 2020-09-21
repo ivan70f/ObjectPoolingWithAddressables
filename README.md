@@ -42,7 +42,7 @@ private void SpawnObject()
     // Spawn object and get a callback with this object.
     // Due to adressables asynchronous loading you can't get object in moment you get it from pool,
     // because unity need a bit of time to load it.
-    // Not that if there is actually available instantiated object in pool you will get callback immidietly.
+    // Note that if there is actually available instantiated object in pool you will get callback immidietly.
     
     if (pool.TryGetObject(prefab, PoolCallback) == true)
         Debug.Log("Prefab spawned");
