@@ -65,6 +65,23 @@ namespace ObjectPool.Core
             }
         }
 
+        public PoolObjectData(
+            AssetReference _prefab,
+            int _maxInstancesAmount,
+            bool _instantiateObjectOnAwake,
+            bool _destroyOverflowInstances,
+            float _overflowInstancesLifeTime)
+        {
+            prefab = _prefab;
+            maxInstancesAmount = _maxInstancesAmount;
+            instantiateObjectOnAwake = _instantiateObjectOnAwake;
+            destroyOverflowInstances = _destroyOverflowInstances;
+            overflowInstancesLifeTime = _overflowInstancesLifeTime;
+            instancesCount = 0;
+            register = new ObjectsRegister();
+            registerCreated = true;
+        }
+
         public void UpdateRegister(ObjectsRegister _register)
         {
             register = _register;

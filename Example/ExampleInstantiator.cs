@@ -8,7 +8,7 @@ namespace ObjectPool.Example
 {
     public class ExampleInstantiator : MonoBehaviour
     {
-        [SerializeField] private AssetReference prefab;
+        [SerializeField] private AssetReference prefab = null;
         
         private ObjectsPool pool;
 

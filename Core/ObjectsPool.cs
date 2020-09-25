@@ -9,7 +9,7 @@ namespace ObjectPool.Core
     [RequireComponent(typeof(PoolObjectsDestroyer))]
     public class ObjectsPool : MonoBehaviour
     {
-        [SerializeField] private PoolObjectData[] objectPools;
+        [SerializeField] private PoolObjectData[] objectPools = new PoolObjectData[]{};
 
         private PoolObjectsDestroyer destroyer;
 
