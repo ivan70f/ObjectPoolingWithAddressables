@@ -94,7 +94,7 @@ namespace ObjectPool.Core
         {
             instancesCount++;
 
-            ObjectsRegister _register = register;
+            ObjectsRegister _register = Register;
             
             _register.AddObjectToRegister(_poolObject);
 
@@ -108,7 +108,7 @@ namespace ObjectPool.Core
         {
             instancesCount--;
             
-            ObjectsRegister _register = register;
+            ObjectsRegister _register = Register;
             
             _register.RemoveObjectFromRegister(_poolObject);
 

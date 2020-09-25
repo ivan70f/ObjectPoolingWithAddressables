@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace ObjectPool.Core
 {
@@ -16,6 +17,8 @@ namespace ObjectPool.Core
         public bool TryGetAvailableObject(ref PoolObject _poolObject)
         {
             ValidateRegister();
+            
+            Debug.Log(instantiatedObjects.Count + " 1");
             
             for (int i = 0; i < instantiatedObjects.Count; i++)
             {
@@ -36,7 +39,7 @@ namespace ObjectPool.Core
         public void AddObjectToRegister(PoolObject _poolObject)
         {
             ValidateRegister();
-            
+            Debug.Log("add");
             instantiatedObjects.Add(_poolObject);
         }
 
