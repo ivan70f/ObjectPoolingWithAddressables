@@ -5,7 +5,7 @@ namespace ObjectPool.Core
 {
     public class PoolObject : MonoBehaviour
     {
-        private bool isActivated = false;
+        private bool isActivated;
         private int poolIndex;
 
         public bool IsActivated => isActivated;
