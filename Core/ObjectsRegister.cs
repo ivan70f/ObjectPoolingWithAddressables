@@ -18,8 +18,6 @@ namespace ObjectPool.Core
         {
             ValidateRegister();
             
-            Debug.Log(instantiatedObjects.Count + " 1");
-            
             for (int i = 0; i < instantiatedObjects.Count; i++)
             {
                 if (instantiatedObjects[i].IsActivated == false)
@@ -39,7 +37,6 @@ namespace ObjectPool.Core
         public void AddObjectToRegister(PoolObject _poolObject)
         {
             ValidateRegister();
-            Debug.Log("add");
             instantiatedObjects.Add(_poolObject);
         }
 
