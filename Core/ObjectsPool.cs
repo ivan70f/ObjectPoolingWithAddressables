@@ -98,9 +98,9 @@ namespace ObjectPool.Core
             if (_register.TryGetAvailableObject(ref _poolObject) == true)
             {
                 objectPools[_poolIndex].UpdateRegister(_register);
-                _poolObject.GetFromPool(_poolIndex);
                 _poolObject.OnHandlerReturnInvoke += ReturnToPool;
                 _callBack?.Invoke(_poolObject);
+                _poolObject.GetFromPool(_poolIndex);
                 return true;
             }
 
@@ -163,9 +163,9 @@ namespace ObjectPool.Core
         private void InitializeNewPoolObject(InvokeData _invokeData)
         {
             objectPools[_invokeData.PoolIndex].RegisterObject(_invokeData.PoolObject);
+            _invokeData.Callback?.Invoke(_invokeData.PoolObject);
             _invokeData.PoolObject.GetFromPool(_invokeData.PoolIndex);
             _invokeData.PoolObject.OnHandlerReturnInvoke += ReturnToPool;
-            _invokeData.Callback?.Invoke(_invokeData.PoolObject);
         }
         
         /// <summary>
