@@ -123,13 +123,13 @@ namespace ObjectPool.Core
                 if (objectPools[i].InstantiateObjectOnAwake == false)
                     continue;
 
-                for (int j = 0; j < objectPools[j].MaxInstancesAmount; j++)
+                for (int j = 0; j < objectPools[i].MaxInstancesAmount; j++)
                 {
-                    ObjectInstatniationCallback _callback = InitializeNewPoolObject;
+                    ObjectInstatniationCallback _callback = InitializeNewPoolObjectOnAwake;
                     
                     InvokeData _invokeData = new InvokeData(null, i, null);
                     
-                    StartCoroutine(InstantiateObject(objectPools[j].Prefab, _callback, _invokeData));
+                    StartCoroutine(InstantiateObject(objectPools[i].Prefab, _callback, _invokeData));
                 }
             }
         }
@@ -166,6 +166,15 @@ namespace ObjectPool.Core
             _invokeData.PoolObject.GetFromPool(_invokeData.PoolIndex);
             _invokeData.PoolObject.OnHandlerReturnInvoke += ReturnToPool;
             _invokeData.Callback?.Invoke(_invokeData.PoolObject);
+        }
+        
+        /// <summary>
+        /// Initialize new instantiated pool object on Awake.
+        /// </summary>
+        private void InitializeNewPoolObjectOnAwake(InvokeData _invokeData)
+        {
+            objectPools[_invokeData.PoolIndex].RegisterObject(_invokeData.PoolObject);
+            _invokeData.PoolObject.gameObject.SetActive(false);
         }
 
         /// <summary>

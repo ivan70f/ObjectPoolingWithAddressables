@@ -36,7 +36,7 @@ namespace ObjectPool.Core
         /// <summary>
         /// Count of currently instantiated objects.
         /// </summary>
-        [SerializeField] private int instancesCount;
+        private int instancesCount;
 
         private bool registerCreated;
         
